@@ -230,6 +230,7 @@ exports.getAllCourses = async (req, res) => {
         })
     }
 }
+
 // Get One Single Course Details
 // exports.getCourseDetails = async (req, res) => {
 //   try {

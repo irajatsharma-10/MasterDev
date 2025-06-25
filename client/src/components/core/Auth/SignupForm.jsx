@@ -3,7 +3,6 @@ import { toast } from "react-hot-toast"
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai"
 import { useDispatch } from "react-redux"
 import { useNavigate } from "react-router-dom"
-
 import { sendOtp } from "../../../services/operations/authAPI"
 import { setSignupData } from "../../../redux/slices/authSlice"
 import { ACCOUNT_TYPE } from "../../../utils/constants"
@@ -27,6 +26,8 @@ function SignupForm() {
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
+
+    // destructuring the form data to make it easier for referencing
     const { firstName, lastName, email, password, confirmPassword } = formData
 
     // Handle input fields, when some value changes

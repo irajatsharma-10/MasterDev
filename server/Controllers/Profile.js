@@ -1,6 +1,5 @@
 const Profile = require("../Models/Profile");
 const User = require("../Models/User");
-const mongoose = require('mongoose');
 const { uploadImageToCloudinary } = require('../Utils/ImageUploader')
 const { convertSecondsToDuration } = require("../Utils/SecToDuration");
 const CourseProgress = require("../Models/CourseProgress");
@@ -33,11 +32,10 @@ exports.updateProfile = async (req, res) => {
         profileDetails.contactNumber = contactNumber;
         // two options to store it into the data
         // .create and .save if already created then just simply apply .save 
-        const updatedProfileDetails = await profileDetails.save();
-        console.log(updatedProfileDetails);
+        await profileDetails.save();
 
 
-        // Find the updated user details
+        // Find the updated user details after changing the profile details
         const updatedUserDetails = await User.findById(id)
             .populate("additionalDetails")
             .exec()
@@ -50,10 +48,10 @@ exports.updateProfile = async (req, res) => {
 
 
     } catch (error) {
-        console.log("Error in updating the profile", error);
         return res.status(500).json({
             success: false,
             message: "Not able to update the profile, Please try again later",
+            error: error.message,
         })
     }
 }
@@ -69,22 +67,19 @@ exports.updateDisplayPicture = async (req, res) => {
         }
         // fetch data 
         const file = req.files.DisplayKey;
-        console.log("Fetched file ", file)
         //validation
         const fileType = file.name.split('.')[1].toLowerCase();
         const supportedTypes = ["jpg", "jpeg", "png"];
-        console.log(fileType);
         if (!supportedTypes.includes(fileType)) {
-            console.log("Not a valid file type");
             return res.status(401).json({
                 success: false,
-                message: "Not a valid file type"
+                message: "Not a valid file type",
             })
         }
         //user id
         const userId = req.user.id;
         const image = await uploadImageToCloudinary(file, process.env.FOLDER_NAME, 1000, 1000);
-        console.log(image);
+        // update the string of the user display profile picture in the user schema
         const updatedProfile = await User.findByIdAndUpdate(userId,
             { image: image.secure_url }, { new: true },
         )
@@ -96,10 +91,10 @@ exports.updateDisplayPicture = async (req, res) => {
 
     }
     catch (error) {
-        console.log("Not able to update the display profile", error);
         return res.status(500).json({
             success: false,
-            message: "Couldn't able to update the display profile"
+            message: "Couldn't able to update the display profile",
+            error: error.message,
         })
     }
 }
@@ -139,7 +134,8 @@ exports.deleteAccount = async (req, res) => {
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: "Not able to delete the account please try again later"
+            message: "Not able to delete the account please try again later",
+            error: error.message,
         })
     }
 }
@@ -159,7 +155,8 @@ exports.getAllUserDetails = async (req, res) => {
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: error.message,
+            message: "Couldn't able to fetch the user details",
+            error: error.message,
         })
 
     }
@@ -187,6 +184,8 @@ exports.getEnrolledCourses = async (req, res) => {
             .exec()
         userDetails = userDetails.toObject()// this method will convert the mongoose document into the plain js object
         var SubsectionLength = 0
+
+        // userDetails.courses in this coures is the property of the userDetails object (userDetails.courses.length is use to determine that how many course are present in courses array of the userDetails object)
         for (var i = 0; i < userDetails.courses.length; i++) {
             let totalDurationInSeconds = 0
             SubsectionLength = 0

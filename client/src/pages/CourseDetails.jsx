@@ -4,7 +4,6 @@ import { HiOutlineGlobeAlt } from "react-icons/hi"
 import { ReactMarkdown } from "react-markdown/lib/react-markdown"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useParams } from "react-router-dom"
-
 import ConfirmationModal from "../components/common/ConfirmationModal"
 import Footer from "../components/common/Footer"
 import RatingStar from "../components/common/RatingStar"
@@ -25,11 +24,8 @@ function CourseDetails() {
     const { paymentLoading } = useSelector((state) => state.course)
     const dispatch = useDispatch()
     const navigate = useNavigate()
-
     // Getting courseId from url parameter
     const { courseId } = useParams()
-    // console.log(`course id: ${courseId}`)
-
     // Declear a state to save the course details
     const [response, setResponse] = useState(null)
     const [confirmationModal, setConfirmationModal] = useState(null)
@@ -45,10 +41,7 @@ function CourseDetails() {
             }
         })()
     }, [courseId])
-
     // console.log("response: ", response)
-
-
     // Calculating Avg Review count
     const [avgReviewCount, setAvgReviewCount] = useState(0)
     useEffect(() => {
@@ -56,7 +49,6 @@ function CourseDetails() {
         setAvgReviewCount(count)
     }, [response])
     // console.log("avgReviewCount: ", avgReviewCount)
-
     // // Collapse all
     // const [collapse, setCollapse] = useState("")
     const [isActive, setIsActive] = useState(Array(0))
@@ -68,7 +60,6 @@ function CourseDetails() {
                 : isActive.filter((e) => e !== id)
         )
     }
-
     // Total number of lectures
     const [totalNoOfLectures, setTotalNoOfLectures] = useState(0)
     useEffect(() => {
@@ -78,7 +69,6 @@ function CourseDetails() {
         })
         setTotalNoOfLectures(lectures)
     }, [response])
-
     if (loading || !response) {
         return (
             <div className="grid min-h-[calc(100vh-3.5rem)] place-items-center">
@@ -89,9 +79,8 @@ function CourseDetails() {
     if (!response.success) {
         return <Error />
     }
-
     const {
-        _id: course_id,
+        // _id: course_id,
         courseName,
         courseDescription,
         thumbnail,
@@ -103,8 +92,6 @@ function CourseDetails() {
         studentsEnrolled,
         createdAt,
     } = response.data?.courseDetails
-
-
     const handleBuyCourse = () => {
         console.log("Hello buying the course");
         if (token ) {
@@ -121,7 +108,6 @@ function CourseDetails() {
             btn2Handler: () => setConfirmationModal(null),
         })
     }
-
     if (paymentLoading) {
         // console.log("payment loading")
         return (
@@ -130,7 +116,6 @@ function CourseDetails() {
             </div>
         )
     }
-
     return (
         <>
             <div className={`relative w-full bg-richblack-800`}>
@@ -196,7 +181,6 @@ function CourseDetails() {
                     </div>
                 </div>
             </div>
-            
             <div className="mx-auto box-content px-4 text-start text-richblack-5 lg:w-[1260px]">
                 <div className="mx-auto max-w-maxContentTab lg:mx-0 xl:max-w-[810px]">
                     {/* What will you learn section */}
@@ -206,7 +190,6 @@ function CourseDetails() {
                             <ReactMarkdown>{whatYouWillLearn}</ReactMarkdown>
                         </div>
                     </div>
-
                     {/* Course Content Section */}
                     <div className="max-w-[830px] ">
                         <div className="flex flex-col gap-3">
@@ -231,7 +214,6 @@ function CourseDetails() {
                                 </div>
                             </div>
                         </div>
-
                         {/* Course Details Accordion */}
                         <div className="py-4">
                             {courseContent?.map((course, index) => (
@@ -243,7 +225,6 @@ function CourseDetails() {
                                 />
                             ))}
                         </div>
-
                         {/* Author Details */}
                         <div className="mb-12 py-4">
                             <p className="text-[28px] font-semibold">Author</p>

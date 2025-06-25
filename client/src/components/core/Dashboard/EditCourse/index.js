@@ -11,6 +11,7 @@ import {
 import { setCourse, setEditCourse } from "../../../../redux/slices/courseSlice"
 import RenderSteps from "../AddCourse/RenderSteps"
 
+
 export default function EditCourse() {
     const dispatch = useDispatch()
     const { courseId } = useParams()
@@ -30,7 +31,7 @@ export default function EditCourse() {
         })
         populateCourse();
         // 
-    }, [])
+    }, [courseId, token , dispatch])
 
     if (loading) {
         return (

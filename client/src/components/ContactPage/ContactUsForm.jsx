@@ -16,7 +16,6 @@ const ContactUsForm = () => {
     } = useForm()
     // The data object is a plain JavaScript object where each key corresponds to the name of a form field, and the value is the user input for that field. The structure of data will match the names and values of the fields in your form 
     const submitContactForm = async (data) => {
-        console.log("Form Data - ", data)
         try {
             setLoading(true)
             const response = await apiConnector(
@@ -24,11 +23,9 @@ const ContactUsForm = () => {
                 contactusEndpoint.CONTACT_US_API,
                 data
             )
-            console.log("Email Res - ", response)
             toast.success("Feedback sent successfully")
             setLoading(false)
         } catch (error) {
-            console.log("Getting the error message - ", error)
             toast.error("Feedback not sent successfully")
             setLoading(false)
         }
@@ -54,6 +51,7 @@ const ContactUsForm = () => {
         >
             <div className="flex flex-col gap-5 lg:flex-row">
                 <div className="flex flex-col gap-2 lg:w-[48%]">
+                {/* this htmlFor is basically the id indicating the form component */}
                     <label htmlFor="first-name" className="lable-style">
                         First Name
                     </label>

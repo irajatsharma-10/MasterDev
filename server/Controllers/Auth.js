@@ -61,14 +61,12 @@ exports.sendOTP = async (req, res) => {
         // {email: email} is same as of {email} it's called javascript shorthand property
         const otpPayload = { email, otp }
         const otpBody = await OTP.create(otpPayload)
-        console.log("OTP Body", otpBody)
         res.status(200).json({
             success: true,
             message: `OTP Sent Successfully`,
             otp,
         })
     } catch (error) {
-        console.log("Error in OTP", error)
         return res.status(500).json({ success: false, error: error.message })
     }
 }
@@ -119,8 +117,8 @@ exports.signUp = async (req, res) => {
         }
 
         // Find the most recent OTP for the email
+        // frontend will trigger the req for sendOTP function
         const response = await OTP.find({ email }).sort({ createdAt: -1 }).limit(1)
-        console.log(response)
         if (response.length === 0) {
             // OTP not found for the email
             return res.status(400).json({
@@ -137,10 +135,6 @@ exports.signUp = async (req, res) => {
 
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10)
-
-        // // Create the user
-        // let approved = ""
-        // approved === "Instructor" ? (approved = false) : (approved = true)
 
         // Create the Additional Profile For User
         const profileDetails = await Profile.create({
@@ -160,36 +154,34 @@ exports.signUp = async (req, res) => {
         })
 
         // Generate JWT token
-        const token = jwt.sign(
+        const TOKEN = jwt.sign(
             { email: user.email, id: user._id, accountType: user.accountType },
             process.env.JWT_SECRET,
             {
                 expiresIn: "24h",
             }
         );
+// no need to do this as it is vulnerable to cross site attacks
+        // // adding a temporary property token to the user object in memory only — not to the database, not saved, just added to the current object before sending it to the frontend.
+        // user.token = TOKEN;
+        user.password = undefined;  // this is necessory as it prevent the password to get exposed while sending the data from the server to the client
 
-        // Save the token to the user document in the database
-        user.token = token;
         const options = {
             expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
             httpOnly: true,
+            secure: true,
         }
-        res.cookie("token", token, options).status(200).json({
-            success: true,
-            token,
-            user,
-            message: `User Signin Success`,
-        })
+        res.cookie("token", TOKEN, options)  // req.cookies.token
         return res.status(200).json({
             success: true,
             user,
             message: "User registered successfully",
         })
     } catch (error) {
-        console.error(error)
         return res.status(500).json({
             success: false,
             message: "User cannot be registered. Please try again.",
+            error: error.message,
         })
     }
 }
@@ -217,7 +209,7 @@ exports.login = async (req, res) => {
             // Return 401 Unauthorized status code with error message
             return res.status(401).json({
                 success: false,
-                message: `User is not Registered with Us Please SignUp to Continue`,
+                message: `User is not Registered with us Please SignUp to Continue`,
             })
         }
 
@@ -230,8 +222,6 @@ exports.login = async (req, res) => {
                     expiresIn: "24h",
                 }
             )
-
-            // Save token to user document in database
 
             user.token = token
             user.password = undefined
@@ -253,11 +243,11 @@ exports.login = async (req, res) => {
             })
         }
     } catch (error) {
-        console.error(error)
         // Return 500 Internal Server Error status code with error message
         return res.status(500).json({
             success: false,
             message: `Login Failure Please Try Again`,
+            error: error.message,
         })
     }
 }
@@ -301,10 +291,12 @@ exports.changePassword = async (req, res) => {
                     `Password updated successfully for ${updatedUserDetails.firstName} ${updatedUserDetails.lastName}`
                 )
             )
-            console.log("Email sent successfully:", emailResponse.response)
+            // Return success response
+            return res
+                .status(200)
+                .json({ success: true, message: "Password updated successfully" })
         } catch (error) {
             // If there's an error sending the email, log the error and return a 500 (Internal Server Error) error
-            console.error("Error occurred while sending email:", error)
             return res.status(500).json({
                 success: false,
                 message: "Error occurred while sending email",
@@ -312,13 +304,8 @@ exports.changePassword = async (req, res) => {
             })
         }
 
-        // Return success response
-        return res
-            .status(200)
-            .json({ success: true, message: "Password updated successfully" })
     } catch (error) {
         // If there's an error updating the password, log the error and return a 500 (Internal Server Error) error
-        console.error("Error occurred while updating password:", error)
         return res.status(500).json({
             success: false,
             message: "Error occurred while updating password",

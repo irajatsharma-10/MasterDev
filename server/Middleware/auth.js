@@ -3,38 +3,42 @@ const User = require('../Models/User');
 require('dotenv').config();
 
 // auth
-exports.auth = async (req,res,next)=>{
-    try{
-        // extract token
-        // best practice header // worst practice body
-        const token = req.cookies.token || req.body.token || req.header("Authorization").replace("Bearer ","");
-        // if token is missing, then return 
-        if(!token){
+exports.auth = async (req, res, next) => {
+    try {
+        // Extract token from cookies or Authorization header only (not body for security)
+        const token = req.cookies.token ||
+                      req.header("Authorization")?.replace("Bearer ", "");
+
+        // If token is missing, return unauthorized
+        if (!token) {
             return res.status(401).json({
                 success: false,
-                message: "Token is missing"
-            })
+                message: "Authentication required. Please login."
+            });
         }
-        // verify the token 
-        try{
-            // token verify using the secret key
-            // decode payload mein already id pass kr rkhi h
-            const decode =  jwt.verify(token, process.env.JWT_SECRET);
-            console.log(decode);
-            req.user = decode;
-        }
-        catch(error){
+
+        // Verify the token
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            req.user = decoded;
+        } catch (error) {
+            if (error.name === 'TokenExpiredError') {
+                return res.status(401).json({
+                    success: false,
+                    message: "Session expired. Please login again."
+                });
+            }
             return res.status(401).json({
                 success: false,
-                message: "token is invalid"
-            })
+                message: "Invalid token. Please login again."
+            });
         }
         next();
-    }catch(error){
+    } catch (error) {
         return res.status(401).json({
             success: false,
-            message: "Something went wrong while validating the token"
-        })
+            message: "Authentication failed. Please try again."
+        });
     }
 }
 // isStudent

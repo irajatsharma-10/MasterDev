@@ -21,6 +21,7 @@ import EditCourse from "./components/core/Dashboard/EditCourse/index"
 import ConfirmationModal from "./components/common/ConfirmationModal"
 import Error from "./pages/Error"
 import Cart from "./components/core/Dashboard/Cart"
+import Wishlist from "./components/core/Dashboard/Wishlist"
 import { ACCOUNT_TYPE } from "./utils/constants"
 import { useSelector } from "react-redux"
 import MyCourses from "./components/core/Dashboard/MyCourses"
@@ -103,6 +104,7 @@ function App() {
                         user?.accountType === ACCOUNT_TYPE.STUDENT && (
                             <>
                                 <Route path="dashboard/cart" element={<Cart />} />
+                                <Route path="dashboard/wishlist" element={<Wishlist />} />
                                 <Route path="dashboard/enrolled-courses" element={<EnrolledCourses />} />
                             </>
                         )

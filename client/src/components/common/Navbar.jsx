@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AiOutlineMenu, AiOutlineShoppingCart, AiOutlineClose, AiOutlineSearch } from "react-icons/ai";
-import { BsChevronDown, BsHeart } from "react-icons/bs";
+import { BsChevronDown, BsHeart, BsSun, BsMoon } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { Link, matchPath, useLocation, useNavigate } from "react-router-dom";
 
@@ -10,6 +10,7 @@ import { apiConnector } from "../../services/apiconnector";
 import { categories } from "../../services/apis";
 import { ACCOUNT_TYPE } from "../../utils/constants";
 import ProfileDropdown from "../core/Auth/ProfileDropdown";
+import { useTheme } from "../../context/ThemeContext";
 
 function Navbar() {
     const { token } = useSelector((state) => state?.auth || {});
@@ -17,6 +18,7 @@ function Navbar() {
     const { totalItems } = useSelector((state) => state?.cart || {});
     const location = useLocation();
     const navigate = useNavigate();
+    const { theme, toggleTheme, isDark } = useTheme();
     const [subLinks, setSubLinks] = useState([]);
     const [loading, setLoading] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -38,16 +40,13 @@ function Navbar() {
 
         fetchCategories();
     }, []);
-    // console.log("Sublinks inside the navbar catalog",subLinks);
 
     const matchRoute = (route) => matchPath({ path: route }, location.pathname);
 
-    // Close mobile menu on route change
     useEffect(() => {
         setMobileMenuOpen(false);
     }, [location.pathname]);
 
-    // Handle search submit
     const handleSearch = (e) => {
         e.preventDefault();
         if (searchQuery.trim()) {
@@ -132,8 +131,21 @@ function Navbar() {
                     </div>
                 </form>
 
-                {/* Login / Signup / Dashboard (instructor should not see cart) */}
+                {/* Right Side Icons */}
                 <div className="hidden items-center gap-x-4 md:flex">
+                    {/* Theme Toggle */}
+                    <button
+                        onClick={toggleTheme}
+                        className="p-2 rounded-full hover:bg-richblack-700 transition-colors"
+                        title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                    >
+                        {isDark ? (
+                            <BsSun className="text-xl text-yellow-50 hover:text-yellow-25 transition-colors" />
+                        ) : (
+                            <BsMoon className="text-xl text-richblack-100 hover:text-richblack-5 transition-colors" />
+                        )}
+                    </button>
+
                     {user && user?.accountType !== ACCOUNT_TYPE.INSTRUCTOR && (
                         <>
                             <Link to="/dashboard/wishlist" className="relative group">
@@ -152,12 +164,12 @@ function Navbar() {
                     {token === null ? (
                         <>
                             <Link to="/login">
-                                <button className="rounded-[8px] border border-richblack-700 bg-richblack-800 px-[12px] py-[8px] text-richblack-100">
+                                <button className="rounded-[8px] border border-richblack-700 bg-richblack-800 px-[12px] py-[8px] text-richblack-100 hover:bg-richblack-700 transition-colors">
                                     Log in
                                 </button>
                             </Link>
                             <Link to="/signup">
-                                <button className="rounded-[8px] border border-richblack-700 bg-richblack-800 px-[12px] py-[8px] text-richblack-100">
+                                <button className="rounded-[8px] border border-richblack-700 bg-richblack-800 px-[12px] py-[8px] text-richblack-100 hover:bg-richblack-700 transition-colors">
                                     Sign up
                                 </button>
                             </Link>
@@ -167,8 +179,19 @@ function Navbar() {
                     )}
                 </div>
 
-                {/* Search and Mobile Menu */}
+                {/* Mobile Menu Icons */}
                 <div className="flex items-center gap-x-3 md:hidden">
+                    {/* Mobile Theme Toggle */}
+                    <button
+                        onClick={toggleTheme}
+                        className="p-2"
+                    >
+                        {isDark ? (
+                            <BsSun fontSize={20} className="text-yellow-50" />
+                        ) : (
+                            <BsMoon fontSize={20} className="text-richblack-100" />
+                        )}
+                    </button>
                     <button
                         onClick={() => setShowSearch(!showSearch)}
                         className="p-2"

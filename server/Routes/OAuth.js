@@ -5,12 +5,15 @@ const { googleCallback, googleFailure, getCurrentUser, logout } = require('../Co
 const { auth } = require('../Middleware/auth');
 
 // Initiate Google OAuth flow
-router.get('/google',
+router.get('/google', (req, res, next) => {
+    // Pass accountType through state parameter
+    const accountType = req.query.accountType || 'Student';
     passport.authenticate('google', {
         scope: ['profile', 'email'],
-        session: false
-    })
-);
+        session: false,
+        state: accountType
+    })(req, res, next);
+});
 
 // Google OAuth callback
 router.get('/google/callback',

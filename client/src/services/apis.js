@@ -43,6 +43,7 @@ export const courseEndpoints = {
         BASE_URL + "/course/getFullCourseDetails",
     LECTURE_COMPLETION_API: BASE_URL + "/course/updateCourseProgress",
     CREATE_RATING_API: BASE_URL + "/course/createRating",
+    SEARCH_COURSES_API: BASE_URL + "/course/search",
 };
 
 // RATINGS AND REVIEWS
@@ -70,4 +71,31 @@ export const settingsEndpoints = {
     UPDATE_PROFILE_API: BASE_URL + "/profile/updateProfile",
     CHANGE_PASSWORD_API: BASE_URL + "/auth/changepassword",
     DELETE_PROFILE_API: BASE_URL + "/profile/deleteProfile",
+};
+
+// WISHLIST ENDPOINTS
+export const wishlistEndpoints = {
+    GET_WISHLIST_API: BASE_URL + "/wishlist",
+    ADD_TO_WISHLIST_API: BASE_URL + "/wishlist/add",
+    REMOVE_FROM_WISHLIST_API: BASE_URL + "/wishlist/remove",
+    CHECK_WISHLIST_API: BASE_URL + "/wishlist/check",
+    CLEAR_WISHLIST_API: BASE_URL + "/wishlist/clear",
+};
+
+// DISCUSSION FORUM ENDPOINTS
+export const discussionEndpoints = {
+    GET_DISCUSSIONS_API: BASE_URL + "/discussion",
+    GET_DISCUSSION_API: BASE_URL + "/discussion",
+    CREATE_DISCUSSION_API: BASE_URL + "/discussion/create",
+    ADD_REPLY_API: BASE_URL + "/discussion/reply",
+    TOGGLE_UPVOTE_API: BASE_URL + "/discussion/upvote",
+    MARK_RESOLVED_API: BASE_URL + "/discussion/resolve",
+    DELETE_DISCUSSION_API: BASE_URL + "/discussion/delete",
+};
+
+// OAUTH ENDPOINTS
+export const oauthEndpoints = {
+    GOOGLE_AUTH_API: BASE_URL + "/oauth/google",
+    GET_CURRENT_USER_API: BASE_URL + "/oauth/me",
+    LOGOUT_API: BASE_URL + "/oauth/logout",
 };

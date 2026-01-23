@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { toast } from "react-hot-toast"
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai"
+import { FcGoogle } from "react-icons/fc"
 import { useDispatch } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { sendOtp } from "../../../services/operations/authAPI"
@@ -14,6 +15,7 @@ function SignupForm() {
 
     // student or instructor
     const [accountType, setAccountType] = useState(ACCOUNT_TYPE.STUDENT)
+    const [isGoogleLoading, setIsGoogleLoading] = useState(false)
 
     const [formData, setFormData] = useState({
         firstName: "",
@@ -25,6 +27,14 @@ function SignupForm() {
 
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
+    // Handle Google Sign Up
+    const handleGoogleSignup = () => {
+        setIsGoogleLoading(true)
+        // Note: Google OAuth creates Student accounts by default
+        // Users can change to Instructor in settings after signup
+        window.location.href = `${process.env.REACT_APP_BASE_URL}/oauth/google`
+    }
 
 
     // destructuring the form data to make it easier for referencing
@@ -83,7 +93,31 @@ function SignupForm() {
     ]
 
     return (
-        <>
+        <div className="flex w-full flex-col gap-y-4">
+            {/* Google Sign Up Button */}
+            <button
+                type="button"
+                onClick={handleGoogleSignup}
+                disabled={isGoogleLoading}
+                className="flex items-center justify-center gap-3 w-full rounded-[8px] border border-richblack-700 bg-richblack-800 py-[10px] px-[12px] font-medium text-richblack-5 hover:bg-richblack-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                {isGoogleLoading ? (
+                    <div className="w-5 h-5 border-2 border-richblack-5 border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                    <FcGoogle size={22} />
+                )}
+                <span>Sign up with Google</span>
+            </button>
+            <p className="text-xs text-richblack-400 text-center -mt-2">
+                Google signup creates a Student account by default
+            </p>
+
+            {/* Divider */}
+            <div className="relative flex items-center justify-center my-2">
+                <div className="border-t border-richblack-700 w-full"></div>
+                <span className="bg-richblack-900 px-4 text-richblack-500 text-sm absolute">or</span>
+            </div>
+
             {/* Tab */}
             {/* allows shifting between instructor and student  */}
             <Tab tabData={tabData} field={accountType} setField={setAccountType} />
@@ -200,12 +234,12 @@ function SignupForm() {
                 </div>
                 <button
                     type="submit"
-                    className="mt-6 rounded-[8px] bg-yellow-50 py-[8px] px-[12px] font-medium text-richblack-900"
+                    className="mt-4 rounded-[8px] bg-yellow-50 py-[10px] px-[12px] font-medium text-richblack-900 hover:bg-yellow-100 transition-all duration-200"
                 >
                     Create Account
                 </button>
             </form>
-        </>
+        </div>
     )
 }
 

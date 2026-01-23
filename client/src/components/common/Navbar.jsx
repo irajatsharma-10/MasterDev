@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { AiOutlineMenu, AiOutlineShoppingCart } from "react-icons/ai";
-import { BsChevronDown } from "react-icons/bs";
+import { AiOutlineMenu, AiOutlineShoppingCart, AiOutlineClose, AiOutlineSearch } from "react-icons/ai";
+import { BsChevronDown, BsHeart } from "react-icons/bs";
 import { useSelector } from "react-redux";
-import { Link, matchPath, useLocation } from "react-router-dom";
+import { Link, matchPath, useLocation, useNavigate } from "react-router-dom";
 
 import logo from "../../assets/Images/masterDevName.jpg";
 import { NavbarLinks } from "../../data/navbar-links";
@@ -16,8 +16,12 @@ function Navbar() {
     const { user } = useSelector((state) => state?.profile || {});
     const { totalItems } = useSelector((state) => state?.cart || {});
     const location = useLocation();
+    const navigate = useNavigate();
     const [subLinks, setSubLinks] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [showSearch, setShowSearch] = useState(false);
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -37,6 +41,21 @@ function Navbar() {
     // console.log("Sublinks inside the navbar catalog",subLinks);
 
     const matchRoute = (route) => matchPath({ path: route }, location.pathname);
+
+    // Close mobile menu on route change
+    useEffect(() => {
+        setMobileMenuOpen(false);
+    }, [location.pathname]);
+
+    // Handle search submit
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            navigate(`/catalog/all?search=${encodeURIComponent(searchQuery.trim())}`);
+            setSearchQuery("");
+            setShowSearch(false);
+        }
+    };
 
     return (
         <div
@@ -99,17 +118,36 @@ function Navbar() {
                     </ul>
                 </nav>
 
+                {/* Desktop Search Bar */}
+                <form onSubmit={handleSearch} className="hidden lg:flex items-center">
+                    <div className="relative">
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Search courses..."
+                            className="w-[200px] xl:w-[280px] rounded-lg bg-richblack-700 pl-10 pr-4 py-2 text-sm text-richblack-5 placeholder-richblack-400 focus:outline-none focus:ring-2 focus:ring-yellow-50 transition-all"
+                        />
+                        <AiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-richblack-400" fontSize={18} />
+                    </div>
+                </form>
+
                 {/* Login / Signup / Dashboard (instructor should not see cart) */}
                 <div className="hidden items-center gap-x-4 md:flex">
                     {user && user?.accountType !== ACCOUNT_TYPE.INSTRUCTOR && (
-                        <Link to="/dashboard/cart" className="relative">
-                            <AiOutlineShoppingCart className="text-2xl text-richblack-100" />
-                            {totalItems > 0 && (
-                                <span className="absolute -bottom-2 -right-2 grid h-5 w-5 place-items-center overflow-hidden rounded-full bg-richblack-600 text-center text-xs font-bold text-yellow-100">
-                                    {totalItems}
-                                </span>
-                            )}
-                        </Link>
+                        <>
+                            <Link to="/dashboard/wishlist" className="relative group">
+                                <BsHeart className="text-xl text-richblack-100 group-hover:text-pink-200 transition-colors" />
+                            </Link>
+                            <Link to="/dashboard/cart" className="relative">
+                                <AiOutlineShoppingCart className="text-2xl text-richblack-100 hover:text-yellow-50 transition-colors" />
+                                {totalItems > 0 && (
+                                    <span className="absolute -bottom-2 -right-2 grid h-5 w-5 place-items-center overflow-hidden rounded-full bg-yellow-50 text-center text-xs font-bold text-richblack-900">
+                                        {totalItems}
+                                    </span>
+                                )}
+                            </Link>
+                        </>
                     )}
                     {token === null ? (
                         <>
@@ -129,10 +167,160 @@ function Navbar() {
                     )}
                 </div>
 
-                {/* Mobile Menu Button */}
-                <button className="mr-4 md:hidden">
-                    <AiOutlineMenu fontSize={24} fill="#AFB2BF" />
-                </button>
+                {/* Search and Mobile Menu */}
+                <div className="flex items-center gap-x-3 md:hidden">
+                    <button
+                        onClick={() => setShowSearch(!showSearch)}
+                        className="p-2"
+                    >
+                        <AiOutlineSearch fontSize={24} fill="#AFB2BF" />
+                    </button>
+                    <button
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        className="p-2"
+                    >
+                        {mobileMenuOpen ? (
+                            <AiOutlineClose fontSize={24} fill="#AFB2BF" />
+                        ) : (
+                            <AiOutlineMenu fontSize={24} fill="#AFB2BF" />
+                        )}
+                    </button>
+                </div>
+            </div>
+
+            {/* Mobile Search Bar */}
+            {showSearch && (
+                <div className="md:hidden border-t border-richblack-700 bg-richblack-800 px-4 py-3">
+                    <form onSubmit={handleSearch} className="flex gap-2">
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Search courses..."
+                            className="flex-1 rounded-lg bg-richblack-700 px-4 py-2 text-richblack-5 placeholder-richblack-400 focus:outline-none focus:ring-2 focus:ring-yellow-50"
+                        />
+                        <button
+                            type="submit"
+                            className="rounded-lg bg-yellow-50 px-4 py-2 text-richblack-900 font-medium"
+                        >
+                            Search
+                        </button>
+                    </form>
+                </div>
+            )}
+
+            {/* Mobile Menu Overlay */}
+            {mobileMenuOpen && (
+                <div
+                    className="fixed inset-0 z-40 bg-black/50 md:hidden"
+                    onClick={() => setMobileMenuOpen(false)}
+                />
+            )}
+
+            {/* Mobile Menu Slide-in */}
+            <div className={`fixed top-0 right-0 z-50 h-full w-[280px] bg-richblack-900 transform transition-transform duration-300 ease-in-out md:hidden ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                <div className="flex flex-col h-full">
+                    {/* Mobile Menu Header */}
+                    <div className="flex items-center justify-between p-4 border-b border-richblack-700">
+                        <span className="text-lg font-semibold text-richblack-5">Menu</span>
+                        <button onClick={() => setMobileMenuOpen(false)}>
+                            <AiOutlineClose fontSize={24} fill="#AFB2BF" />
+                        </button>
+                    </div>
+
+                    {/* Mobile Menu Links */}
+                    <div className="flex-1 overflow-y-auto py-4">
+                        <ul className="flex flex-col">
+                            {NavbarLinks.map((link, index) => (
+                                <li key={index}>
+                                    {link.title === "Catalog" ? (
+                                        <div className="px-4 py-3">
+                                            <p className="text-richblack-300 text-sm mb-2">Categories</p>
+                                            <div className="flex flex-col gap-1">
+                                                {loading ? (
+                                                    <p className="text-richblack-400 text-sm">Loading...</p>
+                                                ) : subLinks?.length ? (
+                                                    subLinks.map((subLink, i) => (
+                                                        <Link
+                                                            to={`/catalog/${subLink?.name.split(" ").join("-").toLowerCase()}`}
+                                                            className="text-richblack-100 py-2 px-3 rounded-lg hover:bg-richblack-700"
+                                                            key={i}
+                                                            onClick={() => setMobileMenuOpen(false)}
+                                                        >
+                                                            {subLink?.name}
+                                                        </Link>
+                                                    ))
+                                                ) : (
+                                                    <p className="text-richblack-400 text-sm">No categories</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <Link
+                                            to={link?.path}
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            className={`block px-4 py-3 ${matchRoute(link?.path) ? "text-yellow-50 bg-richblack-800" : "text-richblack-100"}`}
+                                        >
+                                            {link.title}
+                                        </Link>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* Mobile Menu Footer */}
+                    <div className="border-t border-richblack-700 p-4">
+                        {token === null ? (
+                            <div className="flex flex-col gap-3">
+                                <Link
+                                    to="/login"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="w-full text-center rounded-lg border border-richblack-700 bg-richblack-800 py-2 text-richblack-100"
+                                >
+                                    Log in
+                                </Link>
+                                <Link
+                                    to="/signup"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="w-full text-center rounded-lg bg-yellow-50 py-2 text-richblack-900 font-medium"
+                                >
+                                    Sign up
+                                </Link>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col gap-3">
+                                {user?.accountType !== ACCOUNT_TYPE.INSTRUCTOR && (
+                                    <>
+                                        <Link
+                                            to="/dashboard/cart"
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            className="flex items-center gap-2 text-richblack-100 py-2"
+                                        >
+                                            <AiOutlineShoppingCart fontSize={20} />
+                                            <span>Cart {totalItems > 0 && `(${totalItems})`}</span>
+                                        </Link>
+                                        <Link
+                                            to="/dashboard/wishlist"
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            className="flex items-center gap-2 text-richblack-100 py-2"
+                                        >
+                                            <BsHeart fontSize={18} />
+                                            <span>Wishlist</span>
+                                        </Link>
+                                    </>
+                                )}
+                                <Link
+                                    to="/dashboard/my-profile"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="w-full text-center rounded-lg bg-yellow-50 py-2 text-richblack-900 font-medium"
+                                >
+                                    Dashboard
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );

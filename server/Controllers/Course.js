@@ -499,3 +499,115 @@ exports.deleteCourse = async (req, res) => {
         })
     }
 }
+
+// Search courses with filters
+exports.searchCourses = async (req, res) => {
+    try {
+        const {
+            query,
+            category,
+            minPrice,
+            maxPrice,
+            minRating,
+            sortBy = 'createdAt',
+            sortOrder = 'desc',
+            page = 1,
+            limit = 12
+        } = req.query;
+
+        // Build filter object
+        const filter = { status: 'Published' };
+
+        // Text search on name, description, and tags
+        if (query) {
+            filter.$or = [
+                { courseName: { $regex: query, $options: 'i' } },
+                { courseDescription: { $regex: query, $options: 'i' } },
+                { tag: { $in: [new RegExp(query, 'i')] } }
+            ];
+        }
+
+        // Category filter
+        if (category) {
+            filter.category = category;
+        }
+
+        // Price range filter
+        if (minPrice || maxPrice) {
+            filter.price = {};
+            if (minPrice) filter.price.$gte = Number(minPrice);
+            if (maxPrice) filter.price.$lte = Number(maxPrice);
+        }
+
+        // Calculate pagination
+        const skip = (Number(page) - 1) * Number(limit);
+
+        // Define sort options
+        const sortOptions = {};
+        if (sortBy === 'price') {
+            sortOptions.price = sortOrder === 'asc' ? 1 : -1;
+        } else if (sortBy === 'rating') {
+            // We'll sort by rating after fetching
+            sortOptions.createdAt = -1;
+        } else {
+            sortOptions.createdAt = sortOrder === 'asc' ? 1 : -1;
+        }
+
+        // Fetch courses with population
+        let courses = await Course.find(filter)
+            .populate('instructor', 'firstName lastName image')
+            .populate('category', 'name')
+            .populate('ratingAndReviews')
+            .sort(sortOptions)
+            .skip(skip)
+            .limit(Number(limit));
+
+        // Calculate average rating for each course
+        courses = courses.map(course => {
+            const courseObj = course.toObject();
+            if (courseObj.ratingAndReviews && courseObj.ratingAndReviews.length > 0) {
+                const totalRating = courseObj.ratingAndReviews.reduce((sum, r) => sum + r.rating, 0);
+                courseObj.averageRating = totalRating / courseObj.ratingAndReviews.length;
+            } else {
+                courseObj.averageRating = 0;
+            }
+            courseObj.reviewCount = courseObj.ratingAndReviews ? courseObj.ratingAndReviews.length : 0;
+            return courseObj;
+        });
+
+        // Filter by minimum rating if specified
+        if (minRating) {
+            courses = courses.filter(course => course.averageRating >= Number(minRating));
+        }
+
+        // Sort by rating if requested
+        if (sortBy === 'rating') {
+            courses.sort((a, b) => sortOrder === 'asc'
+                ? a.averageRating - b.averageRating
+                : b.averageRating - a.averageRating
+            );
+        }
+
+        // Get total count for pagination
+        const total = await Course.countDocuments(filter);
+
+        return res.status(200).json({
+            success: true,
+            data: courses,
+            pagination: {
+                currentPage: Number(page),
+                totalPages: Math.ceil(total / Number(limit)),
+                totalCourses: total,
+                hasNextPage: Number(page) < Math.ceil(total / Number(limit)),
+                hasPrevPage: Number(page) > 1
+            }
+        });
+    } catch (error) {
+        console.error("Search courses error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to search courses",
+            error: error.message
+        });
+    }
+}

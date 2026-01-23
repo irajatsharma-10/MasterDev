@@ -12,6 +12,11 @@ passport.use(new GoogleStrategy({
 },
 async (req, accessToken, refreshToken, profile, done) => {
     try {
+        // Get accountType from state parameter (default: Student)
+        const accountType = req.query.state || 'Student';
+        const validAccountTypes = ['Student', 'Instructor'];
+        const finalAccountType = validAccountTypes.includes(accountType) ? accountType : 'Student';
+
         // Check if user already exists with this Google ID
         let user = await User.findOne({ googleId: profile.id });
 
@@ -29,11 +34,12 @@ async (req, accessToken, refreshToken, profile, done) => {
             if (!user.image || user.image.includes('dicebear')) {
                 user.image = profile.photos[0]?.value || user.image;
             }
+            user.authProvider = 'google';
             await user.save();
             return done(null, user);
         }
 
-        // Create new user
+        // Create new user with selected account type
         const profileDetails = await Profile.create({
             gender: null,
             dateOfBirth: null,
@@ -45,8 +51,8 @@ async (req, accessToken, refreshToken, profile, done) => {
             firstName: profile.name.givenName || profile.displayName.split(' ')[0],
             lastName: profile.name.familyName || profile.displayName.split(' ').slice(1).join(' ') || '',
             email: profile.emails[0].value,
-            password: null, // OAuth users don't need password
-            accountType: 'Student', // Default to Student, can change later
+            password: null,
+            accountType: finalAccountType,
             additionalDetails: profileDetails._id,
             image: profile.photos[0]?.value || `https://api.dicebear.com/5.x/initials/svg?seed=${profile.name.givenName}`,
             googleId: profile.id,
@@ -63,7 +69,7 @@ async (req, accessToken, refreshToken, profile, done) => {
     }
 }));
 
-// Serialize user for session (we're not using sessions, but passport requires this)
+// Serialize user for session
 passport.serializeUser((user, done) => {
     done(null, user._id);
 });

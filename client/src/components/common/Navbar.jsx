@@ -18,7 +18,7 @@ function Navbar() {
     const { totalItems } = useSelector((state) => state?.cart || {});
     const location = useLocation();
     const navigate = useNavigate();
-    const { theme, toggleTheme, isDark } = useTheme();
+    const { toggleTheme, isDark } = useTheme();
     const [subLinks, setSubLinks] = useState([]);
     const [loading, setLoading] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

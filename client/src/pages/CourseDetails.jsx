@@ -40,7 +40,7 @@ function CourseDetails() {
                 console.log("Could not fetch Course Details")
             }
         })()
-    }, [courseId])
+    }, [courseId, dispatch])
     // console.log("response: ", response)
     // Calculating Avg Review count
     const [avgReviewCount, setAvgReviewCount] = useState(0)

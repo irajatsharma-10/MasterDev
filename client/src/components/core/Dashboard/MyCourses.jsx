@@ -21,8 +21,7 @@ export default function MyCourses() {
         }
         // to retreive the instructor courses data
         fetchCourses()
-        // 
-    }, [])
+    }, [token])
 
     return (
         <div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { BsHeart, BsHeartFill, BsTrash } from "react-icons/bs"
+import { BsHeart, BsHeartFill } from "react-icons/bs"
 import { AiOutlineStar, AiFillStar, AiOutlineShoppingCart } from "react-icons/ai"
 import { useDispatch, useSelector } from "react-redux"
 import toast from "react-hot-toast"

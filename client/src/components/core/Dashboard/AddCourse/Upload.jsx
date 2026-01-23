@@ -84,7 +84,6 @@
 import { useEffect, useRef, useState } from "react"
 import { useDropzone } from "react-dropzone"
 import { FiUploadCloud } from "react-icons/fi"
-import { useSelector } from "react-redux"
 
 import "video-react/dist/video-react.css"
 import { Player } from "video-react"
@@ -99,7 +98,6 @@ export default function Upload({
     viewData = null,
     editData = null,
 }) {
-    const { course } = useSelector((state) => state.course)
     const [selectedFile, setSelectedFile] = useState(null)
     const [previewSource, setPreviewSource] = useState(
         viewData ? viewData : editData ? editData : ""
@@ -132,13 +130,13 @@ export default function Upload({
 
     useEffect(() => {
         register(name, { required: true })
-        // 
-    }, [register])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [register, name])
 
     useEffect(() => {
         setValue(name, selectedFile)
-        // 
-    }, [selectedFile, setValue])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedFile, setValue, name])
 
     return (
         <div className="flex flex-col space-y-2">

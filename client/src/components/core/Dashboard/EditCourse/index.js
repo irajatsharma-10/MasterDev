@@ -5,7 +5,6 @@ import { useParams } from "react-router-dom"
 
 // we are getting the course id as the params so course ki id myCourses se aayi hogi as the parameter
 import {
-    fetchCourseDetails,
     getFullDetailsOfCourse,
 } from "../../../../services/operations/courseDetailsAPI"
 import { setCourse, setEditCourse } from "../../../../redux/slices/courseSlice"

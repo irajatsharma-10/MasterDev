@@ -141,7 +141,7 @@ exports.createSubSection = async (req, res) => {
 exports.updateSubSection = async (req, res) => {
     try {
         const { sectionId, subSectionId, title, description } = req.body
-        const subSection = await subSection.findById(subSectionId)
+        const subSection = await Subsection.findById(subSectionId)
 
         if (!subSection) {
             return res.status(404).json({

@@ -1,5 +1,6 @@
 const RatingAndReview = require("../Models/RatingAndReview");
 const Course = require("../Models/Course");
+const mongoose = require("mongoose");
 
 // create rating 
 // course id isliye taki kis course ko rating and review de rhe ho
@@ -66,7 +67,7 @@ exports.getAverageRating = async (req,res)=>{
         // get course id
         const courseId = req.body.courseId;
         // calculate average rating
-        const result = await RatingAndReview([
+        const result = await RatingAndReview.aggregate([
             {
                 $match:{
                     course: new mongoose.Types.ObjectId(courseId),
@@ -76,12 +77,12 @@ exports.getAverageRating = async (req,res)=>{
                 $group:{
                     _id: null,
                     // rating is inside the model
-                    averageRating: {$avg: "rating"}
+                    averageRating: {$avg: "$rating"}
                 }
             }
         ])
         // return rating
-        if(res.length > 0){
+        if(result.length > 0){
             return res.status(200).json({
                 success: true,
                 averageRating: result[0].averageRating,
@@ -109,16 +110,15 @@ exports.getAllRating = async (req,res)=>{
         const allRatingReviews = await RatingAndReview.find({})
                                             .sort({rating: "desc"})
                                             .populate({
-                                                path: "User",
-                                                // {firstName: true, lastName: true, email: true, image: true}
+                                                path: "user",
                                                 select:"firstName lastName email image"
                                             })
                                             .populate({
-                                                path: "Course",
+                                                path: "course",
                                                 select: "courseName",
                                             }).exec();
         return res.status(200).json({
-            succcess: true,
+            success: true,
             message: "All rating and reviews fetched successfully",
             data: allRatingReviews,
         })
@@ -126,7 +126,7 @@ exports.getAllRating = async (req,res)=>{
     }
     catch(error){
         console.log(error);
-        return res.status({
+        return res.status(500).json({
             success: false,
             message: "No rating and review available"
         })

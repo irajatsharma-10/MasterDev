@@ -30,6 +30,8 @@ import CourseDetails from "./pages/CourseDetails"
 import VideoDetails from "./components/core/ViewCourse/VideoDetails"
 import ViewCourse from "./pages/ViewCourse"
 import Instructor from "./components/core/Dashboard/InstructorDashboard/Instructor";
+import OAuthCallback from "./pages/OAuthCallback";
+import CompleteSignup from "./pages/CompleteSignup";
 function App() {
     const { user } = useSelector((state) => state?.profile || {});
     return (
@@ -38,6 +40,7 @@ function App() {
             <Navbar />
             <Routes>
                 <Route path="/" element={<Home />}></Route>
+                <Route path="/oauth/callback" element={<OAuthCallback />} />
                 <Route path="/catalog/:catalogName" element={<Catalog />}></Route>
                 <Route path="courses/:courseId" element={<CourseDetails />} />
                 <Route
@@ -74,10 +77,18 @@ function App() {
                     }
                 />
                 <Route
-                    path="update-password/:id"
+                    path="update-password"
                     element={
                         <OpenRoute>
                             <UpdatePassword />
+                        </OpenRoute>
+                    }
+                />
+                <Route
+                    path="complete-signup"
+                    element={
+                        <OpenRoute>
+                            <CompleteSignup />
                         </OpenRoute>
                     }
                 />

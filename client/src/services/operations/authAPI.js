@@ -78,7 +78,6 @@ export function signUp(
 
             localStorage.setItem("token", JSON.stringify(response.data.token))
             localStorage.setItem("user", JSON.stringify(response.data.user))
-            navigate("/dashboard/my-profile")
             toast.success("Signup Successful")
             navigate("/dashboard/my-profile")
         } catch (error) {

@@ -1,5 +1,4 @@
 const BASE_URL = process.env.REACT_APP_BASE_URL;
-console.log(BASE_URL);
 
 // AUTH ENDPOINTS
 export const endpoints = {
@@ -98,4 +97,6 @@ export const oauthEndpoints = {
     GOOGLE_AUTH_API: BASE_URL + "/oauth/google",
     GET_CURRENT_USER_API: BASE_URL + "/oauth/me",
     LOGOUT_API: BASE_URL + "/oauth/logout",
+    COMPLETE_SIGNUP_API: BASE_URL + "/oauth/complete-signup",
+    RESET_PASSWORD_GOOGLE_API: BASE_URL + "/oauth/reset-password-google",
 };

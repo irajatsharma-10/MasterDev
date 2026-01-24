@@ -174,6 +174,7 @@ exports.signUp = async (req, res) => {
         res.cookie("token", TOKEN, options)  // req.cookies.token
         return res.status(200).json({
             success: true,
+            token: TOKEN,
             user,
             message: "User registered successfully",
         })

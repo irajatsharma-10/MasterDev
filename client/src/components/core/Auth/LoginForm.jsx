@@ -1,51 +1,111 @@
-import { useState, useEffect } from "react"
-import { FcGoogle } from "react-icons/fc"
-import { useSearchParams } from "react-router-dom"
-import toast from "react-hot-toast"
+import { useState } from "react"
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai"
+import { useDispatch } from "react-redux"
+import { Link, useNavigate } from "react-router-dom"
+import { login } from "../../../services/operations/authAPI"
 
 function LoginForm() {
-    const [searchParams] = useSearchParams()
-    const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
+    const [isLoading, setIsLoading] = useState(false)
 
-    // Handle OAuth error from URL params
-    useEffect(() => {
-        const error = searchParams.get('error')
-        if (error === 'auth_failed') {
-            toast.error('Google sign-in failed. Please try again.')
-        } else if (error === 'server_error') {
-            toast.error('Server error during sign-in. Please try again.')
-        }
-    }, [searchParams])
+    const [formData, setFormData] = useState({
+        email: "",
+        password: "",
+    })
 
-    const handleGoogleLogin = () => {
-        setIsGoogleLoading(true)
-        window.location.href = `${process.env.REACT_APP_BASE_URL}/oauth/google`
+    const [showPassword, setShowPassword] = useState(false)
+
+    const { email, password } = formData
+
+    const handleOnChange = (e) => {
+        setFormData((prevData) => ({
+            ...prevData,
+            [e.target.name]: e.target.value,
+        }))
+    }
+
+    const handleOnSubmit = async (e) => {
+        e.preventDefault()
+        setIsLoading(true)
+        await dispatch(login(email, password, navigate))
+        setIsLoading(false)
     }
 
     return (
         <div className="mt-6 flex w-full flex-col gap-y-4">
-            <p className="text-center text-richblack-300 text-sm mb-2">
-                Sign in securely with your Google account
+            <form onSubmit={handleOnSubmit} className="flex w-full flex-col gap-y-4">
+                <label className="w-full">
+                    <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-richblack-5">
+                        Email Address <sup className="text-pink-200">*</sup>
+                    </p>
+                    <input
+                        required
+                        type="email"
+                        name="email"
+                        value={email}
+                        onChange={handleOnChange}
+                        placeholder="Enter email address"
+                        className="w-full rounded-[0.5rem] bg-richblack-800 p-[12px] text-richblack-5 border-b border-richblack-700 focus:outline-none focus:border-yellow-50"
+                    />
+                </label>
+
+                <label className="relative w-full">
+                    <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-richblack-5">
+                        Password <sup className="text-pink-200">*</sup>
+                    </p>
+                    <input
+                        required
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        value={password}
+                        onChange={handleOnChange}
+                        placeholder="Enter password"
+                        className="w-full rounded-[0.5rem] bg-richblack-800 p-[12px] pr-10 text-richblack-5 border-b border-richblack-700 focus:outline-none focus:border-yellow-50"
+                    />
+                    <span
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        className="absolute right-3 top-[38px] z-[10] cursor-pointer"
+                    >
+                        {showPassword ? (
+                            <AiOutlineEyeInvisible fontSize={24} fill="#AFB2BF" />
+                        ) : (
+                            <AiOutlineEye fontSize={24} fill="#AFB2BF" />
+                        )}
+                    </span>
+                    <Link to="/forgot-password">
+                        <p className="mt-1 ml-auto max-w-max text-xs text-blue-100">
+                            Forgot Password?
+                        </p>
+                    </Link>
+                </label>
+
+                <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="mt-4 rounded-[8px] bg-yellow-50 py-[10px] px-[12px] font-medium text-richblack-900 hover:bg-yellow-100 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    {isLoading ? (
+                        <div className="flex items-center justify-center gap-2">
+                            <div className="w-5 h-5 border-2 border-richblack-900 border-t-transparent rounded-full animate-spin"></div>
+                            <span>Signing in...</span>
+                        </div>
+                    ) : (
+                        "Sign In"
+                    )}
+                </button>
+            </form>
+
+            <p className="text-richblack-300 text-sm text-center mt-4">
+                Don't have an account?{" "}
+                <Link to="/signup" className="text-yellow-50 hover:underline">
+                    Sign up
+                </Link>
             </p>
 
-            <button
-                type="button"
-                onClick={handleGoogleLogin}
-                disabled={isGoogleLoading}
-                className="flex items-center justify-center gap-3 w-full rounded-[8px] border border-richblack-700 bg-richblack-800 py-[14px] px-[12px] font-medium text-richblack-5 hover:bg-richblack-700 hover:border-richblack-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-                {isGoogleLoading ? (
-                    <div className="w-5 h-5 border-2 border-richblack-5 border-t-transparent rounded-full animate-spin"></div>
-                ) : (
-                    <FcGoogle size={24} />
-                )}
-                <span className="text-base">Continue with Google</span>
-            </button>
-
-            <div className="mt-4 p-4 bg-richblack-800 rounded-lg border border-richblack-700">
+            <div className="mt-2 p-4 bg-richblack-800 rounded-lg border border-richblack-700">
                 <p className="text-richblack-300 text-xs text-center">
-                    By signing in, you agree to our Terms of Service and Privacy Policy.
-                    We use Google for secure authentication.
+                    By continuing, you agree to our Terms of Service and Privacy Policy.
                 </p>
             </div>
         </div>

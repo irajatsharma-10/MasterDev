@@ -1,75 +1,11 @@
 const bcrypt = require("bcryptjs")
 const User = require("../Models/User")
-const OTP = require("../Models/OTP")
 const jwt = require("jsonwebtoken")
-const otpGenerator = require("otp-generator")
 const mailSender = require("../Utils/mailsender")
 const { passwordUpdated } = require("../Mail/templates/passwordUpdate")
 const Profile = require("../Models/Profile")
 require("dotenv").config()
 
-// Send OTP For Email Verification
-exports.sendOTP = async (req, res) => {
-    try {
-        const { email } = req.body
-
-        // Check if user is already present
-        // Find user with provided email
-        const checkUserPresent = await User.findOne({ email })
-        // to be used in case of signup
-
-        // If user found with provided email
-        if (checkUserPresent) {
-            // Return 401 Unauthorized status code with error message
-            return res.status(401).json({
-                success: false,
-                message: `User is Already Registered`,
-            })
-        }
-
-        var otp = otpGenerator.generate(6, {
-            upperCaseAlphabets: false,
-            lowerCaseAlphabets: false,
-            specialChars: false,
-        })
-        // const result = await OTP.findOne({ otp: otp })
-        // console.log("Result is Generate OTP Func")
-        // console.log("OTP", otp)
-        // console.log("Result", result)
-        // while (result) {
-        //     otp = otpGenerator.generate(6, {
-        //         upperCaseAlphabets: false,
-        //         lowerCaseAlphabets: false,
-        //         specialChars: false
-        //     })
-        // }
-
-        // upper code will not work as expected because result is not updated inside the loop(it might result in infinite loop)
-        let result;
-        do {
-            otp = otpGenerator.generate(6, {
-                upperCaseAlphabets: false,
-                lowerCaseAlphabets: false,
-                specialChars: false
-            });
-            result = await OTP.findOne({ otp: otp }); // Check if the new OTP exists
-        } while (result);
-
-
-
-        // when you have variables with the same name as of object property you want to create then you can use the shorthand property 
-        // {email: email} is same as of {email} it's called javascript shorthand property
-        const otpPayload = { email, otp }
-        const otpBody = await OTP.create(otpPayload)
-        res.status(200).json({
-            success: true,
-            message: `OTP Sent Successfully`,
-            otp,
-        })
-    } catch (error) {
-        return res.status(500).json({ success: false, error: error.message })
-    }
-}
 // Signup Controller for Registering USers
 
 exports.signUp = async (req, res) => {
@@ -82,7 +18,6 @@ exports.signUp = async (req, res) => {
             password,
             confirmPassword,
             accountType,
-            otp,
         } = req.body
         // Check if All Details are there or not
         if (
@@ -90,8 +25,7 @@ exports.signUp = async (req, res) => {
             !lastName ||
             !email ||
             !password ||
-            !confirmPassword ||
-            !otp
+            !confirmPassword
         ) {
             return res.status(403).send({
                 success: false,
@@ -113,23 +47,6 @@ exports.signUp = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: "User already exists. Please sign in to continue.",
-            })
-        }
-
-        // Find the most recent OTP for the email
-        // frontend will trigger the req for sendOTP function
-        const response = await OTP.find({ email }).sort({ createdAt: -1 }).limit(1)
-        if (response.length === 0) {
-            // OTP not found for the email
-            return res.status(400).json({
-                success: false,
-                message: "The OTP is not valid",
-            })
-        } else if (otp !== response[0].otp) {
-            // Invalid OTP
-            return res.status(400).json({
-                success: false,
-                message: "The OTP is not valid",
             })
         }
 
@@ -169,11 +86,11 @@ exports.signUp = async (req, res) => {
         const options = {
             expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
             httpOnly: true,
-            secure: true,
         }
         res.cookie("token", TOKEN, options)  // req.cookies.token
         return res.status(200).json({
             success: true,
+            token: TOKEN,
             user,
             message: "User registered successfully",
         })

@@ -7,13 +7,7 @@ const profileRoutes = require('./Routes/Profile');
 const paymentRoutes = require('./Routes/Payment');
 const CourseRoutes = require('./Routes/Course');
 const contactUsRoutes = require('./Routes/ContactUs');
-const oauthRoutes = require('./Routes/OAuth');
-const wishlistRoutes = require('./Routes/Wishlist');
-const discussionRoutes = require('./Routes/Discussion');
 const DBConnect = require('./Config/database');
-
-// Initialize Passport config
-require('./Config/passport');
 
 const cookieParser = require("cookie-parser");
 const {cloudinaryConnect} = require('./Config/Cloudinary');
@@ -21,8 +15,6 @@ const cors = require('cors');
 const fileUpload = require('express-fileupload');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const passport = require('passport');
-
 // Initialize Database
 DBConnect();
 
@@ -83,9 +75,6 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
-// Initialize Passport for OAuth
-app.use(passport.initialize());
-
 app.use(
     fileUpload({
         useTempFiles:true,
@@ -98,23 +87,26 @@ cloudinaryConnect();
 
 // Apply rate limiters and routes
 app.use('/api/v1/auth', authLimiter, userRoutes);
-app.use('/api/v1/oauth', authLimiter, oauthRoutes);
 app.use('/api/v1/profile', generalLimiter, profileRoutes);
 app.use('/api/v1/course', generalLimiter, CourseRoutes);
 app.use('/api/v1/payment', generalLimiter, paymentRoutes);
 app.use('/api/v1/contact', generalLimiter, contactUsRoutes);
-app.use('/api/v1/wishlist', generalLimiter, wishlistRoutes);
-app.use('/api/v1/discussion', generalLimiter, discussionRoutes);
 
-
-app.listen(PORT, ()=>{
-    console.log(`Server listening on the PORT,  ${PORT}`);
-})
 
 app.get("/",(req,res)=>{
     return res.json({
-
         success: true,
         message: "Server is learning successfully"
     })
 })
+
+const server = app.listen(PORT, ()=>{
+    console.log(`Server listening on the PORT,  ${PORT}`);
+})
+
+const shutdown = () => {
+    server.close(() => process.exit(0));
+};
+
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);

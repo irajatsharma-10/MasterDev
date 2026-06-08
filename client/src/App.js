@@ -6,7 +6,6 @@ import Signup from "./pages/Signup"
 import Login from "./pages/Login"
 import About from "./pages/About"
 import Contact from "./pages/Contact"
-import VerifyEmail from "./pages/VerifyEmail"
 import { Toaster } from 'react-hot-toast';
 import OpenRoute from "./components/core/Auth/OpenRoute"
 import ForgotPassword from "./pages/forgotPassword"
@@ -60,15 +59,6 @@ function App() {
                     element={
                         <OpenRoute>
                             <ForgotPassword />
-                        </OpenRoute>
-                    }
-                />
-
-                <Route
-                    path="verify-email"
-                    element={
-                        <OpenRoute>
-                            <VerifyEmail />
                         </OpenRoute>
                     }
                 />

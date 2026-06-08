@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 import OtpInput from "react-otp-input";
 import { Link, useNavigate } from "react-router-dom";
 import { BiArrowBack } from "react-icons/bi";
@@ -21,6 +22,10 @@ function VerifyEmail() {
 
     const handleVerifyAndSignup = (e) => {
         e.preventDefault();
+        if (otp.length !== 6) {
+            toast.error("Please enter the complete 6-digit OTP");
+            return;
+        }
         const {
             accountType,
             firstName,
@@ -92,7 +97,7 @@ function VerifyEmail() {
                         </Link>
                         <button
                             className="flex items-center text-blue-100 gap-x-2"
-                            onClick={() => dispatch(sendOtp(signupData.email))}
+                            onClick={() => dispatch(sendOtp(signupData.email, navigate))}
                         >
                             <RxCountdownTimer />
                             Resend it
